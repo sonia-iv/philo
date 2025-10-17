@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sivashch <sivashch@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/17 19:32:29 by sivashch          #+#    #+#             */
+/*   Updated: 2025/10/17 19:34:23 by sivashch         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PHILO_H
 # define PHILO_H
 
@@ -9,12 +21,8 @@
 # include <unistd.h>
 # include <limits.h>
 
-# ifndef PHILO_NUM
-# define PHILO_NUM 200
-# endif
-
-typedef struct s_args   t_args;
-typedef struct s_philo  t_philo;    
+typedef struct s_args	t_args;
+typedef struct s_philo	t_philo;
 
 /// @brief const values that we read from main
 /*
@@ -27,9 +35,9 @@ typedef struct s_philo  t_philo;
 */
 struct  s_args
 {
-    int             ph_nb; // num of philos
-    long            time_to_die; 
-    long            time_to_eat;
+	int		ph_nb; // num of philos
+	long	time_to_die;
+	long	time_to_eat;
     long            time_to_sleep;
     int             opt_num_of_meals; // optional eat times
     long            curr_time;
@@ -86,8 +94,9 @@ void    print_action(t_args *args, int ph_i, char *act);
 // 							PHILO_ROUTINE
 // ===========================================================
 
-void    ph_eating(t_philo *ph, t_args *args);
 void    wait_while(long time_of_act, t_args *args);
+void    which_fork_to_pick(t_philo *ph, int *fir, int *sec);
+void    ph_eating(t_philo *ph, t_args *args);
 
 // ===========================================================
 // 							PHILOS_DINING

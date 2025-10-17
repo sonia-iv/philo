@@ -9,7 +9,6 @@ void    print_action(t_args *args, int ph_i, char *act)
     fin = args->fin_dining;
     pthread_mutex_unlock(&args->fin_mtx);
     curr_time = find_curr_time();
-    
     if (fin == 0)
     {
         pthread_mutex_lock(&args->print_mtx);

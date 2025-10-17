@@ -9,6 +9,10 @@ void    *thread_routine(void *arg)
     fin = 0;
     ph = arg;
     args = ph->args;
+
+    pthread_mutex_lock(&args->ph_mtx[ph->ph_i]);
+    ph->last_meal_time = find_curr_time();
+    pthread_mutex_unlock(&args->ph_mtx[ph->ph_i]);
     if (ph->ph_i % 2 != 0)
         usleep(args->time_to_eat * 500);
     while (fin == 0)
@@ -31,7 +35,6 @@ int     philos_dining(t_philo *ph, t_args *args)
     i = 0;
     while (i < args->ph_nb)
     {
-        ph[i].last_meal_time = find_curr_time();
         if (pthread_create(&ph[i].thread_ph, NULL, \
                             thread_routine, &ph[i]))
             return (1);
