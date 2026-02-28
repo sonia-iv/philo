@@ -1,1 +1,0 @@
-gcc -g3 -pthread init.c main.c philos_dining.c philo_finish_dining.c thread_ph_routine.c utils_init.c utils_time.c utils_routine.c -o philo
