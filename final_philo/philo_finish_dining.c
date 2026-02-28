@@ -1,0 +1,154 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo_finish_dining.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sivashch <sivashch@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/17 19:25:05 by sivashch          #+#    #+#             */
+/*   Updated: 2025/10/18 17:29:35 by sivashch         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "philo.h"
+
+int	is_fin_dining(t_args *args)
+{
+	int	fin;
+
+	pthread_mutex_lock(&args->fin_mtx);
+	fin = args->fin_dining;
+	pthread_mutex_unlock(&args->fin_mtx);
+	return (fin);
+}
+
+int	ph_died(t_philo *ph, t_args *args, long curr)
+{
+	int		i;
+	long	last_meal;
+
+	i = 0;
+	while (i < args->ph_nb)
+	{
+		pthread_mutex_lock(&args->ph_mtx[i]);
+		last_meal = ph[i].last_meal_time;
+		pthread_mutex_unlock(&args->ph_mtx[i]);
+		if (curr - last_meal >= args->time_to_die + 1)
+		{
+			print_action(args, i, "died");
+			pthread_mutex_lock(&args->fin_mtx);
+			args->fin_dining = 1;
+			pthread_mutex_unlock(&args->fin_mtx);
+			return (1);
+		}
+		i++;
+	}
+	return (0);
+}
+
+int	all_fed(t_philo *ph, t_args *args)
+{
+	int	i;
+
+	if (args->opt_num_of_meals <= 0)
+		return (0);
+	i = 0;
+	while (i < args->ph_nb)
+	{
+		pthread_mutex_lock(&args->ph_mtx[i]);
+		if (ph[i].meals_cnt < args->opt_num_of_meals)
+		{
+			pthread_mutex_unlock(&args->ph_mtx[i]);
+			return (0);
+		}
+		pthread_mutex_unlock(&args->ph_mtx[i]);
+		i++;
+	}
+	return (1);
+}
+
+void	philo_finish_dining(t_philo *ph, t_args *args)
+{
+	long	curr;
+
+	while (1)
+	{
+		if (is_fin_dining(args))
+			break ;
+		curr = find_curr_time();
+		if (ph_died(ph, args, curr))
+			break ;
+		if (all_fed(ph, args))
+		{
+			pthread_mutex_lock(&args->fin_mtx);
+			args->fin_dining = 1;
+			pthread_mutex_unlock(&args->fin_mtx);
+			break ;
+		}
+		usleep(200);
+	}
+}
+
+void	free_thread_destroy_mutex(t_philo *ph, t_args *args)
+{
+	int	i;
+
+	i = -1;
+	while (++i < args->ph_nb)
+	{
+		pthread_mutex_destroy(&args->forks[i]);
+		pthread_mutex_destroy(&args->ph_mtx[i]);
+	}
+	free(args->forks);
+	free(args->ph_mtx);
+	pthread_mutex_destroy(&args->fin_mtx);
+	pthread_mutex_destroy(&args->print_mtx);
+	free(ph);
+}
+
+/*void    philo_finish_dining(t_philo *ph, t_args *args)
+{
+    int     all_fin_din;
+    long    curr;
+    int     i;
+    long    last_meal;
+
+    while (1)
+    {
+        pthread_mutex_lock(&args->fin_mtx);
+        if (args->fin_dining)
+        {
+            pthread_mutex_unlock(&args->fin_mtx);
+            break ;
+        }
+        pthread_mutex_unlock(&args->fin_mtx);
+        all_fin_din = (args->opt_num_of_meals > 0);
+        curr = find_curr_time();
+        i = 0;
+        while (i < args->ph_nb)
+        {
+            pthread_mutex_lock(&args->ph_mtx[i]);
+            last_meal = ph[i].last_meal_time;
+            if (args->opt_num_of_meals > 0
+                && ph[i].meals_cnt < args->opt_num_of_meals)
+                all_fin_din = 0;
+            pthread_mutex_unlock(&args->ph_mtx[i]);
+            if (curr - last_meal >= args->time_to_die + 1)
+            {
+                print_action(args, i, "died");
+                pthread_mutex_lock(&args->fin_mtx);
+                args->fin_dining = 1;
+                pthread_mutex_unlock(&args->fin_mtx);
+                break ;
+            }
+            i++;
+        }
+        if (all_fin_din)
+        {
+            pthread_mutex_lock(&args->fin_mtx);
+            args->fin_dining = 1;
+            pthread_mutex_unlock(&args->fin_mtx);
+        }
+        usleep(200);
+    }
+}*/
